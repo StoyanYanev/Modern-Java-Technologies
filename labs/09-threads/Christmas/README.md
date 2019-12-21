@@ -1,129 +1,205 @@
-# Ламбда изрази и Stream API
+# Многонишково програмиране
+
+## Коледната работилница на Дядо Коледа :christmas_tree:
+
+Коледното настроение вече витае във въздуха около нас и започва да завладява всички. Най-щастливи около празниците традиционно са децата, които нямат търпение да напишат своето писмо до Дядо Коледа.
+
+Потопени в коледния дух, ще се опитаме да симулираме изпращането на писма до Дядо Коледа с желания за подаръци и изработването на подаръци от елфите, използвайки Java нишки.
+
+Децата ще могат паралелно да изпращат писма с желания до Дядо Коледа, а елфите, също паралелно - да създават пожеланите играчки. Логистиката оставяме в ръцете на добрия старец.
 
 ## Условие
 
-Ще създадем програма, която анализира и предоставя статистики върху реален `dataset`, съдържащ данни за *trending* видеата в [YouTube](https://www.youtube.com/) в САЩ в периода 2017-2018 година. `Dataset`-ът е генериран чрез публичното YouTube API, съдържа около 40.500 записа и е взет от [kaggle](https://www.kaggle.com/datasnaek/youtube-new/version/115#USvideos.csv), онлайн платформа за machine learning и data science на Google. За да опростим парсването на файла, сме го обработили предварително и може да го свалите [от тук](./resources/USvideos.txt).
+Задачата е разделена на 5 стъпки (+ 1 допълнителна), като препоръката ни е да започнете с проста имплементация, която, с леки модификации, да подобрите впоследствие.
 
-Всеки ред от файла съдържа информация за наличието на дадено видео в trending списъка на YouTube за определена дата, в следния формат:
+**1. Създайте клас `Workshop`, който ще представлява работилницата на Дядо Коледа:**
 
-`video_id   trending_date   title   publish_time   tags   views   likes   dislikes`
-
-**Забележки:**
-
-- Първият ред на файла съдържа имената на полетата
-- Разделител между полетата на всеки ред е символа за табулация (`\t`)
-- Едно и също видео може да е trending за различни дати, което значи, че може да се среща многократно във файла
-- Таговете за всяко видео са разделени със символа `|` и могат да са или да не са заградени в кавички;
-
-### 1. Зареждане и обработка на данните
-
-Преди да започнем със същинската част на анализа на видеата от `dataset`-a, ще заредим данните в паметта.
-
-Една от първите стъпки в задачите за анализ на данни и machine learning винаги е "изчистване/подготовка" на данните. В общия случай допускаме, че може да има зле форматирани данни, може да липсват елементи, на които разчитаме, или да има такива, които не очакваме.
-
-Понеже целта на занятието е да разберем и упражним Java Stream API-то, ще получите [готова имплементация](./resources/TrendingVideo.java) на `immutable` класа `TrendingVideo`, с метод за парсване на ред от информацията във файла:
 
 ```java
-public static TrendingVideo createTrendingVideo(String line)
+package bg.sofia.uni.fmi.mjt.christmas;
+
+public class Workshop {
+
+    public Workshop() {
+
+    }
+
+    /**
+    * Adds a gift to the elves' backlog.
+    **/
+    public void postWish(Gift gift) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+    * Returns an array of the elves working in Santa's workshop.
+    **/
+    public Elf[] getElves() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+    * Returns the next gift from the elves' backlog that has to be manufactured.
+    **/
+    public Gift nextGift() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+    * Returns the total number of wishes sent to Santa's workshop by the kids.
+    **/
+    public int getWishCount() {
+         throw new UnsupportedOperationException(); 
+    }
+}
 ```
 
-С него създаваме обекти от тип `TrendingVideo` на базата на ред от `dataset`-a.
+:star: Забележки:
+- Използвайте подходяща структура от данни, в която да съхранявате подаръците, които децата са си пожелали, но все още не са изработени от помощниците на Дядо Коледа - добрите елфи.
 
-Ако все пак имате желание да упражните знанията си за работа с файлове и потоци, окуражаваме ви да го имплементирате сами.
+<hr>
 
-### 2. Статистики
+**2. Създайте клас `Kid`, който е нишка и има следния вид:**
 
-След като разполагаме с имплементация на този клас, можем да заредим данните в подходяща колекция, от която да вземем поток и (декларативно) да определим разнообразни статистики.
+```java
+    package bg.sofia.uni.fmi.mjt.christmas;
+    
+    public class Kid {
 
-Класът, който ще предоставя API за статистиките, е `YoutubeTrendsExplorer`:
+        public Kid(Workshop workshop) {
+            throw new UnsupportedOperationException();
+        }
+        
+    }
+```
 
-``` java
-package bg.sofia.uni.fmi.mjt.youtube;
+Задачите, които всяко дете трябва да свърши преди Коледа, са:
 
-import bg.sofia.uni.fmi.mjt.youtube.model.TrendingVideo;
+1. Да си избере подарък - отнема известно време, което можем да симулираме с `Thread.sleep([reasonable random time])`.
 
-import java.io.InputStream;
-import java.util.Collection;
+2. Да изпрати писмо с желание за подаръка към работилницата на Дядо Коледа.
 
-public class YoutubeTrendsExplorer {
+Децата могат да си пожелават различни видове подаръци, които са описани чрез `enum`-a `Gift`. 
 
-    /**
-     * Loads the dataset from the given {@code dataInput} stream.
-     */
-    public YoutubeTrendsExplorer(InputStream dataInput) {
-        throw new UnsupportedOperationException("Method not yet implemented");
+Използвайте метода `getGift()`, за да вземете произволен подарък.
+
+```java
+package bg.sofia.uni.fmi.mjt.christmas;
+
+public enum Gift {
+
+    BIKE("Bicycle", 50), CAR("Car", 10),
+    DOLL("Barbie doll", 6), PUZZLE("Puzzle", 15);
+
+    private final String type;
+    private final int craftTime;
+
+    private static Gift[] gifts = Gift.values();
+
+    private static Random giftRand = new Random();
+
+    private Gift(String type, int craftTime) {
+        this.type = type;
+        this.craftTime = craftTime;
     }
 
-    /**
-     * Returns all videos loaded from the dataset.
-     **/
-    public Collection<TrendingVideo> getTrendingVideos() {
-        return null;
+    public String getType() {
+        return type;
     }
 
-    // Other methods ...
+    public int getCraftTime() {
+        return craftTime;
+    }
+
+    public static Gift getGift() {
+        return gifts[giftRand.nextInt(gifts.length)];
+    }
 
 }
 ```
 
-#### Методи
+<hr>
 
-1. Връща ID-то на trending видеото с най-малко харесвания
+**3. Създайте работилницата на Дядо Коледа и пуснете конкурентно N на брой деца**
 
-    ``` java
-    public String findIdOfLeastLikedVideo()
-    ```
+Изчакайте всички деца да приключат с изпращането на писмата.
 
-2. Връща ID-то на най-одобряваното trending видео - като от броя харесвания вадим броя нехаресвания
+:star: Локално тестване:
 
-    ``` java
-    public String findIdOfMostLikedLeastDislikedVideo()
-    ```
+- Уверете се, че броят на всички желания в работилницата е коректен
 
-3. Връща списък от заглавията на трите най-гледани trending видеа, подредени в намаляващ ред на гледанията
+<hr>
 
-    ``` java
-    public List<String> findDistinctTitlesOfTop3VideosByViews()
-    ```
-4. Връща ID-то на видеото с най-много тагове
+**4. Създайте клас `Elf`, който е нишка и има следния вид:**
 
-    ``` java
-    public String findIdOfMostTaggedVideo()
-    ```
+```java
+package bg.sofia.uni.fmi.mjt.christmas;
 
-5. Връща заглавието на най-рано публикуваното видео, станало trending преди да е събрало 100.000 гледания
+public class Elf {
 
-    ``` java
-    public String findTitleOfFirstVideoTrendingBefore100KViews()
-    ```
+    public Elf(int id, Workshop workshop) {
+        throw new UnsupportedOperationException();
+    }
 
-6. Връща ID-то на видеото, което най-често е било trending
+    /**
+    * Gets a wish from the backlog and creates the wanted gift.
+    **/
+    public void craftGift() {
+        throw new UnsupportedOperationException();
+    }
 
-    ``` java
-    public String findIdOfMostTrendingVideo()
-    ```
+    /**
+    * Returns the total number of gifts that the given elf has crafted.
+    **/
+    public int getTotalGiftsCrafted() {
+         throw new UnsupportedOperationException();
+    }
+}
+```
 
-## Тестване
+  Задачата на елфите ще бъде да създават играчки:
 
-Валидирайте решението си чрез `unit` тестове.
+  1. Взимане на желание за подарък от `backlog`-a.
+  2. Изработване на подаръка. Времето, необходимо за изработване на една играчка, зависи от нейния тип (т.е. `getCraftTime()` от `Gift`) - ще го симулираме отново с `Thread.sleep()`.
 
-Tестовете, които качвате в sapera.org, трябва да работят с входни потоци и да не разчитат на предварително създадени файлове.
+:star: Забележки:
+- По време на изпълнението си, всеки елф взима една по една задача от `backlog`-a с подаръци от работилницата.
+- Списъкът с желания може да бъде временно празен. В такъв случай, елфите без работа изчакват да се появи нова задача.
+
+<hr>
+
+**5. Създайте работилницата на Дядо Коледа - този път с работещи елфи, които да правят играчките**
+
+:star: Забележки:
+- В работилницата на Дядо Коледа работят **20** елфи.
+- При създаването на работилницата, елфите започват да работят.
+- Те се създават с уникални `auto-increment` ID-та, започващи от 0.
+
+:exclamation: Изчакайте известно време и вижте дали елфите приключват работа. Ако не, защо?
+
+<hr>
+
+**6. Традицията повелява, че елфите приключват работа при настъпването на Коледа (Допълнително)**
+
+- В основната нишка, изчакайте даден брой (мили)секунди (настъпването на Коледа).
+- След това, вдигнете флаг в `Workshop`, например `isChristmasTime`, който да даде знак на елфите да спрат да работят.
+- Всички желания, които са останали в `backlog`-a на елфите след настъпване на Коледа, също трябва да бъдат изпълнени.
+- След като всеки елф приключи работа (т.е Коледа е настъпила и вече няма подаръци за изработване), изведете на конзолата ID-то на елфа и броя на изработените от него подаръци (за ваши тестови цели).
+
+:star:  Локално тестване:
+- Уверете се, че броят на всички желания в работилницата е коректен
+- Уверете се, че броят на подаръците, които са изработени, е равен на броя на всички желания
 
 ## Структура на проекта
 
-```bash
+```
 src
 ╷
-└─ bg/sofia/uni/fmi/mjt/youtube/
-╷   ├─ YoutubeTrendsExplorer.java
-|   └─ (...)
-└─ bg/sofia/uni/fmi/mjt/youtube/model
-╷   ├─ TrendingVideo.java
-|   └─ (...)
-test
-╷
-└─ bg/sofia/uni/fmi/mjt/youtube/
-    └─ (...)
+└─ bg/sofia/uni/fmi/mjt/christmas/
+   ├─ Workshop.java
+   ├─ Kid.java
+   ├─ Gift.java
+   └─ Elf.java
 ```
 
-В sapera.org качете общ `zip` архив на папки `src` и `test`.
+В [sapera.org](http://grader.sapera.org/) качете `zip` архив на `src` директорията.
