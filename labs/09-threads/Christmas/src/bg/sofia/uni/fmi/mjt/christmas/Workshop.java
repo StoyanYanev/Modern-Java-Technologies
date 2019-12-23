@@ -63,6 +63,7 @@ public class Workshop {
 
     public synchronized void setChristmasTime() {
         isChristmasTime = true;
+        this.notifyAll();
     }
 
     private void createElves() {
