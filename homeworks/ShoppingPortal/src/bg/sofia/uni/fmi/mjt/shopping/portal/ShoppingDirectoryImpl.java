@@ -101,11 +101,10 @@ public class ShoppingDirectoryImpl implements ShoppingDirectory {
         Set<PriceStatistic> productStatistics = new TreeSet<>(new DateOfferComparator());
         double lowerPrice;
         double averageTotalPrice;
-        PriceStatistic statistic;
         for (Map.Entry<LocalDate, Set<Offer>> currentStatistic : productStatisticsByDays.entrySet()) {
             lowerPrice = currentStatistic.getValue().iterator().next().getTotalPrice();
             averageTotalPrice = getAverageTotalPriceByDate(currentStatistic.getValue());
-            statistic = new PriceStatistic(currentStatistic.getKey(), lowerPrice, averageTotalPrice);
+            PriceStatistic statistic = new PriceStatistic(currentStatistic.getKey(), lowerPrice, averageTotalPrice);
             productStatistics.add(statistic);
         }
 
