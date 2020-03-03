@@ -1,5 +1,7 @@
 package bg.sofia.uni.fmi.mjt.authorship.detection;
 
+import bg.sofia.uni.fmi.mjt.authorship.detection.exceptions.FailedToLoadSignaturesException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +14,8 @@ public class AuthorshipDetectorImpl implements AuthorshipDetector {
     private Map<String, LinguisticSignature> authorLinguisticSignature;
     private double[] weights;
 
-    public AuthorshipDetectorImpl(InputStream signaturesDataset, double[] weights) {
+    public AuthorshipDetectorImpl(InputStream signaturesDataset, double[] weights)
+            throws FailedToLoadSignaturesException {
         authorLinguisticSignature = new HashMap<>();
         buildAuthorsLinguisticSignature(signaturesDataset);
         this.weights = weights;
@@ -24,28 +27,32 @@ public class AuthorshipDetectorImpl implements AuthorshipDetector {
 
     @Override
     public String findAuthor(InputStream mysteryText) {
-        validateText(mysteryText);
-
-        LinguisticSignature linguisticSignature = calculateSignature(mysteryText);
-        Map<String, Double> authorSimilarity = new HashMap<>();
-        double currentSimilarity;
-        for (Map.Entry<String, LinguisticSignature> currentAuthorLinguisticSignature :
-                authorLinguisticSignature.entrySet()) {
-            currentSimilarity = calculateSimilarity(currentAuthorLinguisticSignature.getValue(),
-                    linguisticSignature);
-            authorSimilarity.put(currentAuthorLinguisticSignature.getKey(), currentSimilarity);
+        if (mysteryText == null) {
+            throw new IllegalArgumentException("The stream can not be null!");
         }
 
-        return authorSimilarity.entrySet()
-                .stream()
-                .min(Comparator.comparingDouble(Map.Entry::getValue))
-                .map(Map.Entry::getKey)
-                .orElse(null);
+        LinguisticSignature linguisticSignature = calculateSignature(mysteryText);
+        String author = null;
+        double bestSimilarity = Double.MAX_VALUE;
+        for (Map.Entry<String, LinguisticSignature> currentAuthorLinguisticSignature :
+                authorLinguisticSignature.entrySet()) {
+            double currentSimilarity = calculateSimilarity(currentAuthorLinguisticSignature.getValue(),
+                    linguisticSignature);
+
+            if (currentSimilarity < bestSimilarity) {
+                bestSimilarity = currentSimilarity;
+                author = currentAuthorLinguisticSignature.getKey();
+            }
+        }
+
+        return author;
     }
 
     @Override
     public LinguisticSignature calculateSignature(InputStream mysteryText) {
-        validateText(mysteryText);
+        if (mysteryText == null) {
+            throw new IllegalArgumentException("The stream can not be null!");
+        }
         Map<FeatureType, Double> features = FeaturesCalculator.buildAllFeatures(mysteryText);
 
         return new LinguisticSignature(features);
@@ -70,7 +77,7 @@ public class AuthorshipDetectorImpl implements AuthorshipDetector {
         return sumOfSimilarityValue;
     }
 
-    private void buildAuthorsLinguisticSignature(InputStream signaturesDataset) {
+    private void buildAuthorsLinguisticSignature(InputStream signaturesDataset) throws FailedToLoadSignaturesException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(signaturesDataset))) {
             String currentLine;
             String currentAuthorName;
@@ -85,19 +92,13 @@ public class AuthorshipDetectorImpl implements AuthorshipDetector {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void validateText(InputStream mysteryText) {
-        if (mysteryText == null) {
-            throw new IllegalArgumentException();
+            throw new FailedToLoadSignaturesException("Can not load author signatures!", e.getCause());
         }
     }
 
     private void validateLinguisticSignature(LinguisticSignature signature) {
         if (signature == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("The linguistic signature can not be null!");
         }
     }
 }
